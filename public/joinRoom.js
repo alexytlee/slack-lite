@@ -14,7 +14,7 @@ function joinRoom(roomName) {
     history.forEach((msg) => {
       const newMsg = buildHTML(msg);
       const currentMessages = messageUl.innerHTML;
-      messageUl.innerHTML = currentMessages + newMsg;
+      messageUl.innerHTML += newMsg;
     });
     messageUl.scrollTo(0, messageUl.scrollHeight);
   });
