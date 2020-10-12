@@ -25,4 +25,21 @@ function joinRoom(roomName) {
     ></span>`;
     document.querySelector('.curr-room-text').innerText = `${roomName}`;
   });
+
+  let seearchBox = document.querySelector('#search-box');
+  seearchBox.addEventListener('input', (e) => {
+    console.log(e.target.value);
+    let messages = Array.from(document.getElementsByClassName('message-text'));
+    console.log(messages);
+    messages.forEach((msg) => {
+      if (
+        msg.innerText.toLowerCase().indexOf(e.target.value.toLowerCase()) === -1
+      ) {
+        // the message does not contain the user search term
+        msg.style.display = 'none';
+      } else {
+        msg.style.display = 'block';
+      }
+    });
+  });
 }

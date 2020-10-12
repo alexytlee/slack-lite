@@ -34,8 +34,9 @@ namespaces.forEach((namespace) => {
 
     nsSocket.on('joinRoom', (roomToJoin, numberOfUsersCallback) => {
       // deal with history... once we have it
-      const roomTitle = Object.keys(nsSocket.rooms)[1];
-      nsSocket.leave(roomTitle);
+      const roomToLeave = Object.keys(nsSocket.rooms)[1];
+      nsSocket.leave(roomToLeave);
+      updateUsersInRoom(namespace, roomToLeave);
       nsSocket.join(roomToJoin);
       // io.of(namespace.endpoint)
       //   .in(roomToJoin)
@@ -48,15 +49,7 @@ namespaces.forEach((namespace) => {
       });
 
       nsSocket.emit('historyCatchUp', nsRoom.history);
-      // send back the number of users in this room to ALL sockets connected to this room
-      io.of(namespace.endpoint)
-        .in(roomToJoin)
-        .clients((error, clients) => {
-          console.log(`there are ${clients.length} user(s) in this room`);
-          io.of(namespace.endpoint)
-            .in(roomToJoin)
-            .emit('updateMembers', clients.length);
-        });
+      updateUsersInRoom(namespace, roomToJoin);
     });
 
     nsSocket.on('newMessageToServer', (msg) => {
@@ -90,3 +83,15 @@ namespaces.forEach((namespace) => {
     });
   });
 });
+
+function updateUsersInRoom(namespace, roomToJoin) {
+  // send back the number of users in this room to ALL sockets connected to this room
+  io.of(namespace.endpoint)
+    .in(roomToJoin)
+    .clients((error, clients) => {
+      console.log(`there are ${clients.length} user(s) in this room`);
+      io.of(namespace.endpoint)
+        .in(roomToJoin)
+        .emit('updateMembers', clients.length);
+    });
+}
