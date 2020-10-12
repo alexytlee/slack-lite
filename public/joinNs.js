@@ -1,5 +1,5 @@
 function joinNs(endpoint) {
-  nsSocket = io(`http://localhost:9000/${endpoint}`);
+  nsSocket = io(`http://localhost:9000${endpoint}`);
   nsSocket.on('nsRoomLoad', (nsRooms) => {
     // console.log(nsRooms);
     let roomList = document.querySelector('.room-list');
@@ -48,16 +48,14 @@ function formSubmission() {
 
 function buildHTML(msg) {
   const convertedDate = new Date(msg.time).toLocaleString();
-  const newHTML = `
-    <li>
-        <div class="user-image">
-            <img src="${msg.avatar}" />
-        </div>
-        <div class="user-message">
-            <div class="user-name-time">${msg.username} <span>${convertedDate}</span></div>
-            <div class="message-text">${msg.text}</div>
-        </div>
-    </li>    
-    `;
+  const newHTML = `<li>
+  <div class="user-image">
+    <img src="${msg.avatar}" />
+  </div>
+  <div class="user-message">
+    <div class="user-name-time">${msg.username} <span>${convertedDate}</span></div>
+    <div class="message-text">${msg.text}</div>
+  </div>
+</li>`;
   return newHTML;
 }
