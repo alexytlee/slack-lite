@@ -34,6 +34,8 @@ namespaces.forEach((namespace) => {
 
     nsSocket.on('joinRoom', (roomToJoin, numberOfUsersCallback) => {
       // deal with history... once we have it
+      const roomTitle = Object.keys(nsSocket.rooms)[1];
+      nsSocket.leave(roomTitle);
       nsSocket.join(roomToJoin);
       // io.of(namespace.endpoint)
       //   .in(roomToJoin)
@@ -81,7 +83,9 @@ namespaces.forEach((namespace) => {
         'the room object that we made that matches this namespace room is...'
       );
       console.log(nsRoom);
-      nsRoom.addMessage(fullMsg);
+      if (nsRoom) {
+        nsRoom.addMessage(fullMsg);
+      }
       io.of(namespace.endpoint).to(roomTitle).emit('messageToClients', fullMsg);
     });
   });

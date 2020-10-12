@@ -1,7 +1,15 @@
 function joinNs(endpoint) {
+  if (nsSocket) {
+    // check to see if nsSocket is actually a socket
+    nsSocket.close();
+    // remove the eventListener before it's added again
+    document
+      .querySelector('#user-input')
+      .removeEventListener('submit', formSubmission);
+  }
   nsSocket = io(`http://localhost:9000${endpoint}`);
   nsSocket.on('nsRoomLoad', (nsRooms) => {
-    // console.log(nsRooms);
+    // console.log(nsRooms)
     let roomList = document.querySelector('.room-list');
     roomList.innerHTML = '';
     nsRooms.forEach((room) => {
@@ -17,7 +25,7 @@ function joinNs(endpoint) {
     let roomNodes = document.getElementsByClassName('room');
     Array.from(roomNodes).forEach((elem) => {
       elem.addEventListener('click', (e) => {
-        // console.log('someone clicked on', e.target.innerText);
+        // console.log("somone clicked on ",e.target.innerText);
         joinRoom(e.target.innerText);
       });
     });
@@ -27,7 +35,6 @@ function joinNs(endpoint) {
     // console.log(topRoomName);
     joinRoom(topRoomName);
   });
-
   nsSocket.on('messageToClients', (msg) => {
     console.log(msg);
     const newMsg = buildHTML(msg);
@@ -38,24 +45,24 @@ function joinNs(endpoint) {
     .addEventListener('submit', formSubmission);
 }
 
-function formSubmission() {
-  return (event) => {
-    event.preventDefault();
-    const newMessage = document.querySelector('#user-message').value;
-    nsSocket.emit('newMessageToServer', { text: newMessage });
-  };
+function formSubmission(event) {
+  event.preventDefault();
+  const newMessage = document.querySelector('#user-message').value;
+  nsSocket.emit('newMessageToServer', { text: newMessage });
 }
 
 function buildHTML(msg) {
   const convertedDate = new Date(msg.time).toLocaleString();
-  const newHTML = `<li>
-  <div class="user-image">
-    <img src="${msg.avatar}" />
-  </div>
-  <div class="user-message">
-    <div class="user-name-time">${msg.username} <span>${convertedDate}</span></div>
-    <div class="message-text">${msg.text}</div>
-  </div>
-</li>`;
+  const newHTML = `
+  <li>
+      <div class="user-image">
+          <img src="${msg.avatar}" />
+      </div>
+      <div class="user-message">
+          <div class="user-name-time">${msg.username} <span>${convertedDate}</span></div>
+          <div class="message-text">${msg.text}</div>
+      </div>
+  </li>    
+  `;
   return newHTML;
 }
