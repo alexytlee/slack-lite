@@ -17,7 +17,8 @@ socket.on('nsList', (nsData) => {
     elem.addEventListener('click', (e) => {
       // console.dir(e.target);
       const nsEndpoint = elem.getAttribute('ns');
-      console.log(`${nsEndpoint} that i should go to now`);
+      // console.log(`${nsEndpoint} that i should go to now`);
+      joinNs(nsEndpoint);
     });
   });
   joinNs('wiki');

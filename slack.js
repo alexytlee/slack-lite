@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const socketio = require('socket.io');
 
-let namespaces = require('./data/namespace');
+let namespaces = require('./data/namespaces');
 // console.log(namespaces[0]);
 
 app.use(express.static(__dirname + '/public'));
@@ -30,17 +30,33 @@ namespaces.forEach((namespace) => {
     console.log(`${nsSocket.id} has joined ${namespace.endpoint}`);
     // a socket has connected to one of our chatgroup namespaces
     // send that ns group info back
-    nsSocket.emit('nsRoomLoad', namespaces[0].rooms);
+    nsSocket.emit('nsRoomLoad', namespace.rooms);
+
     nsSocket.on('joinRoom', (roomToJoin, numberOfUsersCallback) => {
       // deal with history... once we have it
       nsSocket.join(roomToJoin);
-      io.of('/wiki')
+      // io.of(namespace.endpoint)
+      //   .in(roomToJoin)
+      //   .clients((error, clients) => {
+      //     // console.log(clients.length);
+      //     numberOfUsersCallback(clients.length);
+      //   });
+      const nsRoom = namespace.rooms.find((room) => {
+        return room.roomTitle === roomToJoin;
+      });
+
+      nsSocket.emit('historyCatchUp', nsRoom.history);
+      // send back the number of users in this room to ALL sockets connected to this room
+      io.of(namespace.endpoint)
         .in(roomToJoin)
         .clients((error, clients) => {
-          // console.log(clients.length);
-          numberOfUsersCallback(clients.length);
+          console.log(`there are ${clients.length} user(s) in this room`);
+          io.of(namespace.endpoint)
+            .in(roomToJoin)
+            .emit('updateMembers', clients.length);
         });
     });
+
     nsSocket.on('newMessageToServer', (msg) => {
       const fullMsg = {
         text: msg.text,
@@ -58,8 +74,15 @@ namespaces.forEach((namespace) => {
       // get the keys
       const roomTitle = Object.keys(nsSocket.rooms)[1];
       // we need to find the Room object for this room
-      const nsRoom = name;
-      io.of('/wiki').to(roomTitle).emit('messageToClients', fullMsg);
+      const nsRoom = namespace.rooms.find((room) => {
+        return room.roomTitle === roomTitle;
+      });
+      console.log(
+        'the room object that we made that matches this namespace room is...'
+      );
+      console.log(nsRoom);
+      nsRoom.addMessage(fullMsg);
+      io.of(namespace.endpoint).to(roomTitle).emit('messageToClients', fullMsg);
     });
   });
 });
